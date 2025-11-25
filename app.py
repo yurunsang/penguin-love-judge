@@ -18,9 +18,20 @@ if "verdict_md" not in st.session_state:
 if "verdict_revealed" not in st.session_state:
     st.session_state.verdict_revealed = False
 
-# --------- OPENAI CLIENT ---------
-api_key = os.getenv("OPENAI_API_KEY") or st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=api_key)
+# --------- OPENAI CLIENT SETUP ---------
+# 1) Try to get key from Streamlit secrets
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+
+# 2) Fallback to environment variable (local dev)
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    st.error("OPENAI_API_KEY is not set. Please add it in Streamlit Secrets or as an environment variable.")
+    st.stop()
+
+# 3) Create client – it will read from env
+client = OpenAI()
 
 # --------- PAGE HEADER (common) ---------
 st.title("🐧 Penguin Love Judge")
